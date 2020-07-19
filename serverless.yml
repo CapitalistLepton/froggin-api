@@ -1,0 +1,67 @@
+service:
+  name: froggin-api
+
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules:
+      forceExclude:
+        - aws-sdk
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - { "Fn::GetAtt": ["UsersDynamoDBTable", "Arn" ] }
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    USERS_TABLE: "froggin.users-table-${self:provider.stage}"
+
+functions:
+  froggin:
+    handler: src/handler.froggin
+    events:
+      - http: ANY /
+      - http: "ANY {proxy+}"
+
+resources:
+  Resources:
+    UsersDynamoDBTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: username
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: username
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: "froggin.users-table-${self:provider.stage}"
