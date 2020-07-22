@@ -13,17 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Router, Request, Response } from "express";
-import auth from "./auth";
-import colors from "./colors";
+import { Request, Response } from "express";
+import { DBColors, Colors } from "../models/Colors";
 
-const routes = Router();
+export default class ColorsController {
 
-routes.use("/auth", auth);
-routes.use("/colors", colors);
+    static async list(_req: Request, res: Response): Promise<void> {
+        const username = res.locals.jwtPayload.username;
 
-routes.get("/message", (_req: Request, res: Response) => {
-    res.send({ message: "This is message route" });
-});
+        let colors: Colors;
+        try {
+            colors = await DBColors.getColors(username);
+        } catch (error) {
+            console.error(`Failed to get colors ${error}`);
+            res.status(401).send();
+            return;
+        }
 
-export default routes;
+        res.send(colors);
+    }
+}

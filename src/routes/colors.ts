@@ -13,17 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Router, Request, Response } from "express";
-import auth from "./auth";
-import colors from "./colors";
+import { Router } from "express";
+import ColorsController from "../controllers/ColorsController";
+import { checkJwt } from "../middleware/checkJwt";
 
-const routes = Router();
+const router = Router();
 
-routes.use("/auth", auth);
-routes.use("/colors", colors);
+router.get("/list", [checkJwt], ColorsController.list);
 
-routes.get("/message", (_req: Request, res: Response) => {
-    res.send({ message: "This is message route" });
-});
-
-export default routes;
+export default router;
