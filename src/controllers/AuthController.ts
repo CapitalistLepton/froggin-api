@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 import { DBUser, User } from "../models/User";
 import Payload from "../models/Payload";
+
+const SALT_ROUNDS = 5;
 
 export default class AuthController {
 
@@ -91,8 +93,16 @@ export default class AuthController {
             return;
         }
 
+        let hashed: string;
         try {
-            await DBUser.putUser(username, newPassword);
+            hashed = await hash(newPassword, SALT_ROUNDS);
+        } catch (error) {
+            res.status(401).send();
+            return;
+        }
+
+        try {
+            await DBUser.putUser(username, hashed);
         } catch (error) {
             res.status(401).send();
             return;

@@ -27,6 +27,7 @@ class DBUser {
             TableName: process.env.USERS_TABLE,
             Key: {
                 username: username,
+                column: "password",
             },
         };
         try {
@@ -38,12 +39,13 @@ class DBUser {
         }
     }
 
-    static async putUser(username: string, password: string): Promise<void> {
+    static async putUser(username: string, hashedPassword: string): Promise<void> {
         const params: DynamoDB.DocumentClient.PutItemInput = {
             TableName: process.env.USERS_TABLE,
             Item: {
                 username: username,
-                password: password,
+                column: "password",
+                password: hashedPassword,
             },
         };
         try {
