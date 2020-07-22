@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 import { Router, Request, Response } from "express";
-import auth from './auth';
+import auth from "./auth";
 
 const routes = Router();
 
 routes.use("/auth", auth);
 
 routes.get("/message", (_req: Request, res: Response) => {
-  res.send({ message: "This is message route" });
+    res.send({ message: "This is message route" });
 });
 
 export default routes;

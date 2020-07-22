@@ -25,7 +25,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(helmet());
 
-// Use routin from routes directory
+// Use routing from routes directory
 app.use("/", routes);
 
 export const froggin: APIGatewayProxyHandler = serverless(app);
