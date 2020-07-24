@@ -18,9 +18,13 @@ import * as jwt from "jsonwebtoken";
 import Payload from "../models/Payload";
 
 export const checkJwt = (req: Request, res: Response, next: NextFunction): void => {
-    const token = <string> req.headers["auth"];
-    let jwtPayload: Payload;
+    console.log("Headers: " + JSON.stringify(req.headers));
+    console.log("Auth: " + JSON.stringify(req.headers.authorization));
+    const authHeader = <string> req.headers.authorization;
+    // Header begins with "Bearer "
+    const token = authHeader.substring(7);
 
+    let jwtPayload: Payload;
     try {
         jwtPayload = jwt.verify(token, process.env.JWT_SECRET) as Payload;
         res.locals.jwtPayload = jwtPayload;
@@ -30,9 +34,7 @@ export const checkJwt = (req: Request, res: Response, next: NextFunction): void 
     }
 
     // Refresh the token since it is only valid for 1 hour
-    const newToken = jwt.sign(jwtPayload, process.env.JWT_SECRET, {
-        expiresIn: "1h"
-    });
+    const newToken = jwt.sign(jwtPayload, process.env.JWT_SECRET);
     res.setHeader("token", newToken);
 
     // Call the next middleware or controller

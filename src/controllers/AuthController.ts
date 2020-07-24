@@ -35,7 +35,7 @@ export default class AuthController {
             user = await DBUser.getUser(username);
         } catch (error) {
             console.error(`Failed to get user ${error}`);
-            res.status(401).send();
+            res.status(401).send({ error: "Incorrect username or password" });
             return;
         }
 
@@ -43,11 +43,11 @@ export default class AuthController {
         try {
             result = await compare(password, user.password);
         } catch (error) {
-            res.status(401).send();
+            res.status(500).send({ error: JSON.stringify(error) });
             return;
         }
         if (!result) {
-            res.status(401).send();
+            res.status(401).send({ error: "Incorrect username or password" });
             return;
         }
 
@@ -60,7 +60,7 @@ export default class AuthController {
         );
 
         //Send the jwt in the response
-        res.send(token);
+        res.send({ token: token });
     }
 
     static async changePassword(req: Request, res: Response): Promise<void> {
@@ -77,7 +77,7 @@ export default class AuthController {
         try {
             user = await DBUser.getUser(username);
         } catch (error) {
-            res.status(401).send();
+            res.status(500).send({ error: JSON.stringify(error) });
             return;
         }
 
@@ -85,11 +85,11 @@ export default class AuthController {
         try {
             result = await compare(oldPassword, user.password);
         } catch (error) {
-            res.status(401).send();
+            res.status(500).send({ error: JSON.stringify(error) });
             return;
         }
         if (!result) {
-            res.status(401).send();
+            res.status(401).send({ error: "Incorrect oldPassword" });
             return;
         }
 
@@ -97,14 +97,14 @@ export default class AuthController {
         try {
             hashed = await hash(newPassword, SALT_ROUNDS);
         } catch (error) {
-            res.status(401).send();
+            res.status(500).send({ error: JSON.stringify(error) });
             return;
         }
 
         try {
             await DBUser.putUser(username, hashed);
         } catch (error) {
-            res.status(401).send();
+            res.status(500).send({ error: JSON.stringify(error) });
             return;
         }
 

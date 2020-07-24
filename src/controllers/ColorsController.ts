@@ -26,7 +26,7 @@ export default class ColorsController {
             colors = await DBColors.getColors(username);
         } catch (error) {
             console.error(`Failed to get colors ${error}`);
-            res.status(401).send();
+            res.status(500).send({ error: JSON.stringify(error) });
             return;
         }
 
