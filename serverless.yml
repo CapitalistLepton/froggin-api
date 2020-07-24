@@ -4,7 +4,7 @@ service:
 custom:
   dynamodb:
     stages:
-      - dev
+      - offline
     start:
       port: 8000
       inMemory: true
@@ -13,9 +13,12 @@ custom:
     webpackConfig: ./webpack.config.js
     includeModules:
       forceExclude:
-        - aws-sdk
+  serverless-offline-ssm:
+    stages:
+      - offline
 
 plugins:
+  - serverless-offline-ssm
   - serverless-webpack
   - serverless-dynamodb-local
   - serverless-offline
@@ -23,6 +26,7 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
+  stage: ${opt:stage, "dev"}
   region: us-east-1
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
@@ -40,6 +44,7 @@ provider:
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     USERS_TABLE: "froggin.users-table-${self:provider.stage}"
+    JWT_SECRET: ${ssm:frogginSecret}
 
 functions:
   froggin:

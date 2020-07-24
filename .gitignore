@@ -11,3 +11,6 @@ jspm_packages
 
 # macOS
 .DS_Store
+
+# Serverless Offline SSM
+.env
